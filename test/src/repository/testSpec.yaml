@@ -1,0 +1,153 @@
+openapi: 3.0.0
+servers:
+  - description: local server
+    url: http://localhost:8080/api/v1/carcongestion
+info:
+  description: This is a car congestion tax calculator(but it needs to be 50 character long otherwise it'll return a validation error that's why i'm typying this nonsense... ha ha ha ha ha. so funny.)
+  version: "1.0.0"
+  title: Car Congestion tax calculator
+  contact:
+    email: lagnashreedey@email.com
+tags:
+  - name: Taxcaculator
+    description: calculates the tax of a vehicle
+  - name: NonTaxble vehicle
+    description: Operations related to non taxable vehicles
+paths:
+  /tax_calculator:
+    post:
+      tags:
+        - Tax calculator
+      summary: get the total tax amount of a vehicle
+      operationId: getTax
+      description: |
+        By passing the vehicle type, date and time in the request body you will get the tax amount of the vehicle
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/totaltax'
+        '400':
+          description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/taxcalculator'
+  /nontaxable_vehicle:
+    post:
+      tags:
+        - NonTaxable Vehicle
+      summary: Add new non_taxable vehicle
+      operationId: postvehicle
+      description: |
+        Creates a new record of a non_taxable vehicle
+      responses:
+        '201':
+          description: Record successfully created
+        '400':
+          description: bad input parameter
+        '409':
+          description: Record already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/vehicle_details'
+        description: New non-taxable vehicle to add
+    get:
+      tags:
+        - NonTaxable Vehicle
+      summary: get vehicles list
+      operationId: getvehicle
+      description: |
+        you can get the list of all non taxable vehicles
+      responses:
+        '200':
+          description: successfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle_list'
+        '400':
+          description: bad input parameter
+        '404':
+          description: Not found
+
+  /nontaxable_vehicle/{id}:
+    delete:
+      tags:
+        - NonTaxable Vehicle
+      summary: deletes a non_taxable vehicle
+      operationId: deletevehicle
+      description: |
+        By passing id you can delete the record of a non_taxable vehicle
+      parameters:
+        - in: path
+          name: id
+          description: pass an mandatory vehicle id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operation successfull
+        '400':
+          description: bad input parameter
+        '404':
+          description: No record found
+components:
+  schemas:
+    taxcalculator:
+      type: object
+      required:
+        - vehicle_name
+        - date&time
+      properties:
+        vehicle_name:
+          type: string
+          example: dmahvx
+        date&time:
+          type: string
+          format: date-time
+          example:  "2021-01-30T08:30:00Z"
+    totaltax:
+      type: object
+      required:
+        - vehicle_name
+        - taxamount
+      properties:
+        vehicle_name:
+          type: string
+          example: dmahvx
+        taxamount:
+          type: string
+          example:  "100"
+    vehicle_details:
+      type: object
+      required:
+        - vehicle_name
+        - id
+      properties:
+        vehicle_name:
+          type: string
+          example: dmahvx
+        id:
+          type: string
+          example:  "100"
+    vehicle_list:
+      type: object
+      required:
+        - vehicle_list
+      properties:
+        vehicle_list:
+          type: array
+          items:
+            type: string
+            example: military

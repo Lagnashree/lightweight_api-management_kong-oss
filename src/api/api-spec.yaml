@@ -1,0 +1,190 @@
+openapi: 3.0.0
+servers:
+  - description: local server
+    url: http://localhost:8080/api/v1/catalog-service
+info:
+  description: This is a API Catalog Service
+  version: "1.0.0"
+  title: API Catalog Service
+  contact:
+    email: lagnashreedey@gmail.com
+tags:
+  - name: ApiCatalog
+    description: All the information about APIs
+paths:
+  /api:
+    post:
+      tags:
+        - Post API
+      summary: Post information about API(without Api_id) with git url
+      operationId: postAPI
+      description:
+        By passing all the information about the Api in the request body you can enter a new Api record
+      responses:
+        '201':
+          description: Record successfully created
+        '400':
+          description: bad input parameter
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/postApiInput'
+    get:
+      tags:
+        - Get APIs list
+      summary: Add new non_taxable vehicle
+      operationId: postvehicle
+      description:
+        you can get the list of information of all APIs
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAPIoutput'
+        '400':
+          description: bad input parameter
+        '409':
+          description: Record already exists
+  /api/{id}:
+    patch:
+      tags:
+        - patch API record
+      summary: changes only API state
+      operationId: patchAPI
+      description:
+        By providing Api-name, environment and Api-version you can change the Api-state of that particular Api.
+      parameters:
+        - in: path
+          name: Api-name, Api-version, environment
+          description: pass mandatory Api-name, Api-version, environment
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successfull
+        '400':
+          description: bad input parameter
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - Delete API record
+      summary: deletes an Api record
+      operationId: deleteAPI
+      description: |
+        By passing id you can delete the record of a non_taxable vehicle
+      parameters:
+        - in: path
+          name: Api-name, Api-version, environment
+          description: pass mandatory Api-name, Api-version, environment
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operation successfull
+        '400':
+          description: bad input parameter
+        '404':
+          description: No record found
+components:
+  schemas:
+    postApiInput:
+      type: object
+      required:
+        - apiVersion
+        - environment
+        - apiName
+        - catalogName
+        - apiSecurity
+        - apiOrg
+        - apiState
+        - createDate
+        - enabled
+        - url
+        - backendHost
+      properties:
+        apiVersion:
+          type: string
+          example: dmahvx
+        environment:
+          type: string
+          example: ddhk
+        apiName:
+          type: string
+          example: ggkb
+        catalogName:
+          type: string
+          example: zcnn
+        apiSecurity:
+          type: string
+          example: fxskj
+        apiOrg:
+          type: string
+          example: tyfgk
+        apiState:
+          type: string
+          example: nhkln
+        createDate:
+          format: date-time
+          type: string
+          example:  "2021-01-30T08:30:00Z"
+        enabled:
+          type: boolean
+          example: "1"
+        url:
+          type: string
+          example: dhfch/hkl/giygk/hygvj
+        backendHost:
+          type: string
+          example: https://localhost
+            
+    getAPIoutput:
+      type: object
+      required:
+        - apiVersion
+        - environment
+        - apiName
+        - catalogName
+        - apiSecurity
+        - apiOrg
+        - apiState
+        - createDate
+        - enabled
+      properties:
+        apiVersion:
+          type: string
+          example: dmahvx
+        environment:
+          type: string
+          example: ddhk
+        apiName:
+          type: string
+          example: ggkb
+        createDate:
+          type: string
+          example: sgfx
+        catalogName:
+          type: string
+          example: zcnn
+        apiSecurity:
+          type: string
+          example: fxskj
+        apiOrg:
+          type: string
+          example: tyfgk
+        apiState:
+          type: string
+          example: nhkln
+        enabled:
+          type: boolean
+          example: "1"
+
