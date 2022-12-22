@@ -7,9 +7,71 @@ The code base here covers the API Gateway installation and setup and nodejs appl
     <img src="arch1.png">
 </div>
 
+
+## GCP Set up
+### Application Deployment and runtime
+#### GCP Service Account Creation
+* Create a service account for application deployment with below roles
+    * Cloud Build Service Account 
+    * Cloud Run Developer 
+    * Service Account User 
+* Create a service account for application runtime with below roles
+    * Pub/Sub Publisher
+    * Storage Object Admin
+
+####  Create a GCS Bucket
+
+####  Create pubsub topic
+
+#### Create a postgresSQL instance in cloud SQL
+
+#### Create GCP Workload identity federation
+ 
+📚 Read more : [GCP Workload Identity Federation for Github ](https://medium.com/google-cloud/how-does-the-gcp-workload-identity-federation-work-with-github-provider-a9397efd7158)
+
+```
+gcloud iam workload-identity-pools create "<POOL-NAME>" \
+  --project="<PROJECT-ID>" \
+  --location="global" \
+  --display-name="<POOL-NAME>"
+```
+
+```
+gcloud iam workload-identity-pools describe "<POOL-NAME>" \
+  --project="<PROJECT-ID>" \
+  --location="global" \
+  --format="value(name)"
+```
+
+```
+export WORKLOAD_IDENTITY_POOL_ID="projects/<PROJECT-ID>/locations/global/workloadIdentityPools/<POOL-NAME>"
+```
+
+```
+gcloud iam workload-identity-pools providers create-oidc "<GCP-IDNETITY-PROVIDER-NAME>" \
+  --project="<PROJECT-ID>" \
+  --location="global" \
+  --workload-identity-pool=<POOL-NAME>" \
+  --display-name="<GCP-IDNETITY-PROVIDER-NAME>" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+```
+
+```
+gcloud iam service-accounts add-iam-policy-binding "SERVICE-ACCOUNT-PRINCIPAL" \
+  --project="<PROJECT-ID>" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/Lagnashree/lightweight_api-management_kong-oss"
+```
+
+gcloud iam service-accounts add-iam-policy-binding "SERVICE-ACCOUNT-PRINCIPAL" \
+  --project="devproject-372318" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/Lagnashree/lightweight_api-management_kong-oss"
+
 ## Kong OSS Installation
 
-Here I have chosen GCP VM to install the kong OSS version 3.0.x (Note this installation is not ready for production use but to set up an quick kong GW to demo)
+Here I have chosen GCP VM to install the kong OSS version 3.0.x (Note this installation is not ready for production use but to set up a quick kong GW to demo)
 
 ### Step 1
 In GCP console create a VM with below details
