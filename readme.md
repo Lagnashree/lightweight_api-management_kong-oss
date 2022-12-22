@@ -11,13 +11,16 @@ The code base here covers the API Gateway installation and setup and nodejs appl
 ## GCP Set up
 ### Application Deployment and runtime
 #### GCP Service Account Creation
+
 * Create a service account for application deployment with below roles
     * Cloud Build Service Account 
     * Cloud Run Developer 
     * Service Account User 
+
 * Create a service account for application runtime with below roles
     * Pub/Sub Publisher
     * Storage Object Admin
+    * Secret Manager Secret Accessor 
 
 ####  Create a GCS Bucket
 
@@ -69,13 +72,40 @@ gcloud iam service-accounts add-iam-policy-binding "SERVICE-ACCOUNT-PRINCIPAL" \
   --role="roles/iam.workloadIdentityUser" \
   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/Lagnashree/lightweight_api-management_kong-oss"
 
+
+### GCP Secret Manager
+Create a secret manager called "runtime-secret" with below JSON secret value, replace the values in JSON payload with right data.
+```
+{
+"POSTGRES_HOST":"<POSTGRES_HOST>",
+"POSTGRES_PORT":"<POSTGRES_PORT>",
+"POSTGRES_USERNAME":"<POSTGRES_USERNAME>",
+"POSTGRES_PASSWORD":"<POSTGRES_PASSWORD>",
+"POSTGRES_DATABASE":"<POSTGRES_DATABASE>",
+"BUCKET_NAME":"<BUCKET_NAME>",
+"KONG_ADMIN_TOKEN":"<KONG_ADMIN_TOKEN>",
+"KONG_ADMIN_URL":"<KONG_ADMIN_URL>",
+"GIT_ACCESS_TOKEN": "<GIT_ACCESS_TOKEN>"
+}
+```
+
+## GIT SETUP
+### Create GIT Secret
+  
+Create below GIT secret for GIT Hub Action:
+
+* SA_RUNTIME_EMAIL
+* VPC_CONNECTOR
+* PROJECT_ID
+
+
 ## Kong OSS Installation
 
 Here I have chosen GCP VM to install the kong OSS version 3.0.x (Note this installation is not ready for production use but to set up a quick kong GW to demo)
 
 ### Step 1
 In GCP console create a VM with below details
-Allow TCP 8001 PORT in newtwork firewall
+Allow TCP 8001 PORT in network firewall
     
 ### Step 2:
 Logged into VM and ran below steps. It would install required dependency and download kong binaries and install the package
@@ -103,3 +133,6 @@ sudo cp /etc/kong/kong.conf.default /etc/kong/kong.conf
 ```
 
 open the /etc/kong/kong.conf and add below lines
+
+
+
