@@ -1,7 +1,9 @@
 name: CI develop
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
     branches:
       - develop
 permissions:
