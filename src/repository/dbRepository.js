@@ -1,19 +1,23 @@
 const knex = require('knex');
+const path = require("path");
 const moment = require('moment-timezone');
 const pg = require('pg');
-const fetchSecret = require("../utils/fetchSecret");
-let tableName = process.env.TABLE_NAME;
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
+let tableName = 'api_catalog_t';
+const dotenv = require("dotenv");
+const envFilePath = path.join(__dirname, "../../", ".env");
+dotenv.config({ path: envFilePath });
 
 async function getKnexClient() {
-    let cloudSecret = await fetchSecret.getCloudSecret();
     return knex({
         client: 'pg',
         connection: {
-            host: process.env.POSTGRES_HOST,
-            port: process.env.POSTGRES_PORT,
+            host: cloudSecret.POSTGRES_HOST,
+            port: cloudSecret.POSTGRES_PORT,
             user: cloudSecret.POSTGRES_USERNAME,
             password: cloudSecret.POSTGRES_PASSWORD,
-            database: process.env.POSTGRES_DATABASE
+            database: cloudSecret.POSTGRES_DATABASE
         }
     })
 }
@@ -23,14 +27,13 @@ async function getFromDb() {
         return await knexClient(tableName).select('*');
     }
     catch (error) {
-        console.log(error)
-
+        throw error;
     }
 }
 
 async function postIntoDb(apiVersion, environment, apiName, catalogName, apiSecurity, apiOrg, apiState, enabled, specUrl) {
     try {
-        let apiId = apiName + "_" + apiVersion + "_" + environment;
+        let apiId = apiName.replace(/\s+/g, '-').toLowerCase();
         let knexClient = await getKnexClient();
         await knexClient(tableName).insert({
             api_id: apiId,
@@ -42,11 +45,11 @@ async function postIntoDb(apiVersion, environment, apiName, catalogName, apiSecu
             api_org: apiOrg,
             api_state: apiState,
             create_date: getTime(),
-            enabled: enabled
+            enabled: true
         })
     }
     catch (error) {
-        console.log(error)
+       throw error;
     }
 }
 
@@ -60,13 +63,12 @@ async function deleteFromDb(apiVersion, environment, apiName) {
         await knexClient(tableName).where('api_version', apiVersion).andWhere('environment', environment).andWhere('api_name', apiName).del();
     }
     catch (error) {
-        console.log(error)
-
+        throw error;
     }
 }
 
 module.exports = {
     postIntoDb,
     deleteFromDb,
-    getFromDb
+    getFromDb 
 }
