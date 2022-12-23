@@ -4,6 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "loadSecrets": "node ./conf/loadSecretFromGcp.js",
+    "start": "npm run loadSecrets && node server.js",
     "test": "mocha --config test/.mocharc.js"
   },
   "author": "lagnashree",
@@ -11,10 +13,12 @@
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
     "@google-cloud/pubsub": "^3.1.1",
+    "@google-cloud/secret-manager": "^4.2.0",
     "@google-cloud/storage": "^6.5.0",
     "axios": "^0.27.2",
     "body-parser": "^1.20.1",
     "chai": "^4.3.7",
+    "deep-equal-in-any-order": "^2.0.1",
     "dotenv": "^16.0.3",
     "email-validator": "^2.0.4",
     "express": "^4.18.1",
