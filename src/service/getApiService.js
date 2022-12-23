@@ -2,7 +2,9 @@ const axios = require('axios');
 const https = require('https');
 const dbRepository = require("../repository/dbRepository");
 const logger = require('../config/winston').logger;
-let kongAdminToken = process.env.KONG_ADMIN_TOKEN;
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
+let kongAdminToken =cloudSecret.KONG_ADMIN_TOKEN;
 const { BaseError, notFound, internalServerError, serviceUnavailable, badRequest } = require('../utils/error')
 
 let kongConfig = {
@@ -44,7 +46,7 @@ exports.getApiInfo = async function (page, limit, uniqueRqId) {
 async function checkApiInGateway(api_name) {
     try {
         console.log(api_name);
-        let gatewayApiNamePresentResponse = await instance.get(`${process.env.KONG_ADMIN_URL}/services/${api_name}`, kongConfig);
+        let gatewayApiNamePresentResponse = await instance.get(`${cloudSecret.KONG_ADMIN_URL}/services/${api_name}`, kongConfig);
         if (gatewayApiNamePresentResponse.status == 200)
             return true;
         else
