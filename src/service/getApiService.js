@@ -44,7 +44,7 @@ exports.getApiInfo = async function (page, limit, uniqueRqId) {
 async function checkApiInGateway(api_name) {
     try {
         console.log(api_name);
-        let gatewayApiNamePresentResponse = await instance.get(`${process.env.GW_URL}/services/${api_name}`, kongConfig);
+        let gatewayApiNamePresentResponse = await instance.get(`${process.env.KONG_ADMIN_URL}/services/${api_name}`, kongConfig);
         if (gatewayApiNamePresentResponse.status == 200)
             return true;
         else
@@ -57,6 +57,3 @@ async function checkApiInGateway(api_name) {
             throw new BaseError(internalServerError, `Internal server error the API ${apiNameInDb}`)
     }
 }
-
-
-
