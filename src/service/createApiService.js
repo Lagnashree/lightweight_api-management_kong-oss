@@ -31,7 +31,7 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
                 rejectUnauthorized: false
             })
         });
-        //await dbRepository.postIntoDb(reqBody.apiVersion, reqBody.environment, reqBody.apiName, reqBody.catalogName, reqBody.apiSecurity, reqBody.apiOrg, reqBody.apiState, reqBody.enabled, reqBody.specUrl)
+        
         let gatewayCreateServiceReqBody = {
             name: reqBody.apiName,
             protocol: 'https',
@@ -52,22 +52,31 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
         catch (error) {
             console.log('error');
             logger.log('error',`reqId: ${uniqueRqId}. Error while downloading spec file,  ${error}`);
-            throw new BaseError(internalServerError, `unable to download spec file for API ${reqBody.apiName}`)
+            throw new BaseError(internalServerError, `unable to download spec file for API ${jsonSpecFile.info.title}`)
         }
         let validationErrorArr=[];
         try{        
-            validationErrorArr= specValidator.openAPIValidator(jsonSpecFile);
+            validationErrorArr= await specValidator.openAPIValidator(jsonSpecFile);
+            console.log(validationErrorArr);
         }
         catch(error){
             logger.log('error',`reqId: ${uniqueRqId}. Error while validation spec`);
             throw error;
         }
         if (validationErrorArr.length != 0){
-                logger.log('error',`reqId: ${uniqueRqId}. Error while validation spec,  ${error}`);
+                logger.log('error',`reqId: ${uniqueRqId}. Error while validation spec`);
                 throw new BaseError(badRequest, JSON.stringify(validationErrorArr))
         }
         try {
-                let deckFile= kongRepository.generateDeckDeclarativeFile(reqBody.apiName, jsonSpecFile, reqBody.backendHost);
+            await dbRepository.postIntoDb(jsonSpecFile.info.version, reqBody.environment, jsonSpecFile.info.title, reqBody.catalogName, reqBody.apiSecurity, reqBody.apiOrg, reqBody.apiState, reqBody.enabled, reqBody.specUrl)
+        }catch (error) {
+            console.log('error in DB operation');
+            logger.log('error',`reqId: ${uniqueRqId}. Error whilesaving metadata to DB,  ${error}`);
+            throw new BaseError(internalServerError, `Error whilesaving metadata to DB ${jsonSpecFile.info.title}`)
+        }
+        try {
+                let deckFile= kongRepository.generateDeckDeclarativeFile(jsonSpecFile.info.title, jsonSpecFile, reqBody.backendHost);
+                console.log('deckFile',deckFile)
                 logger.log('info',`reqId: ${uniqueRqId}. The generated deck declarative file,  ${JSON.stringify(deckFile)}`);
                 //await  kongRepository.deployToKong(deckFile,reqBody.apiName );
         }catch (error) {
@@ -75,28 +84,28 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
                 throw new BaseError(internalServerError, "Error while deploying to kong gateway ")
         }                 
         try {
+            await gcsAdapter.postFile(jsonSpecFile.info.title, jsonSpecFile.info.version, reqBody.environment, specFileFromGit);
             logger.log('info',`reqId: ${uniqueRqId}. Spec file is saved in gcs bucket`);
-            //await gcsAdapter.postFile(reqBody.apiName, reqBody.apiVersion, reqBody.environment, specFileFromGit);
         }
         catch (error) {
             logger.log('error',`reqId: ${uniqueRqId},  Error while storing spec file in GCS,  ${error}`);
-            throw new BaseError(internalServerError, `unable to store spec file in GCS for API ${reqBody.apiName}`)
+            throw new BaseError(internalServerError, `unable to store spec file in GCS for API ${jsonSpecFile.info.title}`)
         }
         const eventData = {
-            apiTitle: reqBody.apiName,
-            apiVersion: reqBody.apiVersion,
+            apiTitle: jsonSpecFile.info.title,
+            apiVersion: jsonSpecFile.info.version,
             environment: reqBody.environment,
             catalog: reqBody.catalogName,
             event: 'create'
         }
         try {
-            //await pubsubRepository.postEvent(eventData);
+            await pubsubRepository.postEvent(eventData);
             logger.log('info',`reqId: ${uniqueRqId}. Event is pubslied to topic`);
             logger.log('debug',`reqId: ${uniqueRqId}. Event is pubslied to topic with eventData: ${eventData}`);
         }
         catch (error) {
             logger.log('error',`reqId: ${uniqueRqId},  Error  while publishing events to pubsub,  ${error}`);
-            throw new BaseError(internalServerError, `unable to publish creation message in pubsub for API ${apiName}`)
+            throw new BaseError(internalServerError, `unable to publish creation message in pubsub for API ${jsonSpecFile.info.title}`)
         }
         logger.log("info",`reqId: ${uniqueRqId}, All operations for POST API are successfully completed`);
         return { status: 201, detail: 'success' }
@@ -107,5 +116,3 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
         throw error;
     }
 }
-
-
