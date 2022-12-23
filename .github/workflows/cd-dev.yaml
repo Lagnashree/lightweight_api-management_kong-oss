@@ -39,8 +39,8 @@ jobs:
           gcloud builds submit \
             --quiet \
             --tag "eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
-            --gcs-log-dir "gs://apim_cloud_build/log" \
-            --gcs-source-staging-dir "gs://apim_cloud_build/staging"
+            --gcs-log-dir "gs://cloud_build-123/log" \
+            --gcs-source-staging-dir "gs://cloud_build-123/staging"
       - name: Deploy
         run: |-
           gcloud run deploy "$SERVICE_NAME" \
@@ -51,4 +51,4 @@ jobs:
             --min-instances=0 \
             --service-account="${{ secrets.SA_RUNTIME_EMAIL }}" \
             --set-env-vars=PROJECT_ID="$PROJECT_ID" \
-            --set-env-vars=TEMP_DIR="/app/tempDir"
+            --set-env-vars=TEMP_DIR="/app/tempDir" 
