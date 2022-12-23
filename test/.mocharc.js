@@ -13,5 +13,4 @@ module.exports= {
   ui: "bdd",
   watch: false,
   "watch-files": ["../src/**/*.js", "./**/*.js"],
-
 };
