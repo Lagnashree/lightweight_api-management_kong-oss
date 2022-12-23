@@ -7,9 +7,7 @@ const deleteApiService = require('../service/deleteApiService');
 const patchApiService = require('../service/patchApiService');
 const StatusCodes = require('http-status-codes');
 const util= require('../utils/common');
-var Validator = require('jsonschema').Validator;
-var v = new Validator();
-const apiInputSchema= require("../schema/apiInput");
+const requestValidator= require("../utils/requestValidator");
 const { BaseError, notFound, internalServerError, serviceUnavailable, badRequest } = require('../utils/error')
 
 router.post('/', async (req, res) => {
@@ -19,9 +17,9 @@ router.post('/', async (req, res) => {
     let reasonPhrase;
     let uniqueRqId = util.generateID();
     try {
-        let validationResult= v.validate(req.body, apiInputSchema.schema);
-        logger.log("debug",`Request under process successfully. reqId:${uniqueRqId}`);
+        let validationResult= requestValidator.apiPostReqValidator(req.body);
         if(validationResult.errors.length>0){
+            console.log('input validation error');
             logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : validationResult.errors`);
             throw new BaseError(badRequest, JSON.stringify(validationResult.errors));
         }
@@ -49,7 +47,7 @@ router.post('/', async (req, res) => {
 
 
 router.get('/', async (req, res) => {
-    console.log("get");
+    let uniqueRqId = util.generateID();
     let statusCode = 404;
     let reasonPhrase;
     let page = req.query.page;
@@ -69,20 +67,16 @@ router.get('/', async (req, res) => {
 
 
 router.delete('/:apiName/:apiVersion/:environment', async (req, res) => {
+    let uniqueRqId = util.generateID();
     let statusCode = 404;
     let reasonPhrase = 'BAD_REQUEST';
     try {
-        if (typeof req.params.apiName == 'undefined' || req.params.apiName == '' || typeof req.params.apiVersion == 'undefined' || req.params.apiVersion == '' || typeof req.params.environment == 'undefined' || req.params.environment == '') {
-            statusCode = StatusCodes.BAD_REQUEST;
-            reasonPhrase = 'BAD_REQUEST';
-            throw new BaseError(badRequest, "apiName, apiVersionn and environment are manadatory field");
-        }
-        else if (req.params.environment && !['prod', 'ppe', 'dev'].includes(req.params.environment.toLowerCase())) {
-            statusCode = StatusCodes.BAD_REQUEST;
-            reasonPhrase = 'BAD_REQUEST';
-            throw new BaseError(badRequest, "Invalid environment field. Value should be one of dev, ppe, prod");
-        }
-        let deleteInfo = await deleteApiService.deleteApiInfo(req.params.apiName, req.params.apiVersion, req.params.environment);
+        /*let validationResult= requestValidator.apiDeleteReqValidator(req);
+        if(validationResult.errors.length>0){
+            logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : validationResult.errors`);
+            throw new BaseError(badRequest, JSON.stringify(validationResult.errors));
+        }*/
+        let deleteInfo = await deleteApiService.deleteApiInfo(req.params.apiName, req.params.apiVersion, req.params.environment, uniqueRqId);
         if (deleteInfo.status === 200) {
             console.log('deleteInfo', deleteInfo.detail);
             statusCode = deleteInfo.status;
