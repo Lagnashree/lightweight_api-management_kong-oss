@@ -6,7 +6,7 @@ on:
 env:
   PROJECT_ID: "${{ secrets.PROJECT_ID }}"
   RUN_REGION: europe-west4
-  SERVICE_NAME: lightweight_api-management_kong-oss
+  SERVICE_NAME: lightweight-api-management
 
 jobs:
   setup-build-deploy:
