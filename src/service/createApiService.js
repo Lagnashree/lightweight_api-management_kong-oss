@@ -7,17 +7,11 @@ const dbRepository = require("../repository/dbRepository");
 const kongRepository = require("../repository/kongRepository");
 const yaml = require('js-yaml');
 const specValidator= require("../utils/specValidator");
-let gitToken = process.env.GIT_TOKEN;
-let kongAdminToken = process.env.KONG_ADMIN_TOKEN;
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
+let gitToken = cloudSecret.GIT_TOKEN;
 const { BaseError, notFound, internalServerError, serviceUnavailable, badRequest } = require('../utils/error')
 
-let adminUrl = ''
-let kongConfig = {
-    headers: {
-        'Kong-Admin-Token': kongAdminToken,
-        'Content-Type': 'application/json'
-    }
-}
 let gitConfig = {
     headers: {
         'Authorization': "token " + gitToken,
