@@ -26,7 +26,7 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v0.4.1"
         with:
-          workload_identity_provider: "${{ secrets.GCP_IDENTITY_PROVIDER }}
+          workload_identity_provider: "${{ secrets.GCP_IDENTITY_PROVIDER }}"
           service_account: "${{ secrets.SA_BUILD_DEPLOY }}"
       - id: "gcloud"
         name: "gcloud"
