@@ -1,33 +1,37 @@
 const axios = require('axios');
 const https = require('https');
+const logger = require('../config/winston').logger;
 const gcsAdapter = require("../repository/gcsRepository");
 const pubsubRepository = require("../repository/pubsubRepository");
 const dbRepository = require("../repository/dbRepository");
 let kongAdminToken = process.env.KONG_ADMIN_TOKEN;
 const { BaseError, notFound, internalServerError, serviceUnavailable, badRequest } = require('../utils/error')
+const fetchSecret = require("../utils/fetchSecret");
 
-let kongConfig = {
+
+const kongConfig = {
     headers: {
         'Kong-Admin-Token': kongAdminToken
     }
 }
-
-exports.deleteApiInfo = async function (apiName, apiVersion, environment) {
+const instance = axios.create({
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false
+    })
+});
+exports.deleteApiInfo = async function (apiName, apiVersion, environment, uniqueRqId) {
     try {
-        const instance = axios.create({
-            httpsAgent: new https.Agent({
-                rejectUnauthorized: false
-            })
-        });
+        
 
         await dbRepository.deleteFromDb(apiVersion, environment, apiName);
         logger.log('info',`reqId: ${uniqueRqId}. Deleting the API from DB`);
 
         try {
-            let gatewayDeleteResponse = await instance.delete(`${process.env.GW_URL}/services/${apiName}`, kongConfig);
-            logger.log('debug',`reqId: ${uniqueRqId}. Deleting the API from gateway ${gatewayDeleteResponse}`); 
-            if (gatewayDeleteResponse.status == 200)
-            logger.log('info',`reqId: ${uniqueRqId}. The API is successfully deleted from gateway`);
+            const kongRouters= await getKongRouter(apiName);
+            for (const kongRoute of kongRouters) {
+                await deleteKongRouter(kongRoute.id);
+            }
+            await deleteKongService(apiName);
         }
         catch (error) {
             logger.log('error',`reqId: ${uniqueRqId}. error while deleting the API from gateway ${error}`);
@@ -65,6 +69,39 @@ exports.deleteApiInfo = async function (apiName, apiVersion, environment) {
 
     catch (error) {
         logger.log('error',`reqId: ${uniqueRqId}. error while deleting the API service ${error}`);
+        throw error;
+    }
+}
+
+async function getKongRouter(apiName)
+{
+    try {
+        let kongRouteForApi = await instance.get(`${process.env.KONG_ADMIN_URL}/services/${apiName}/routes`, kongConfig);
+        console.log(kongRouteForApi.data.data);
+        return kongRouteForApi.data.data;
+    }
+    catch(error)
+    {
+        throw error;
+    }
+}
+async function deleteKongRouter(routeId)
+{
+    try {
+        return await instance.delete(`${process.env.KONG_ADMIN_URL}/routes/${routeId}`, kongConfig);
+    }
+    catch(error)
+    {
+        throw error;
+    }
+}
+async function deleteKongService(apiName)
+{
+    try {
+        return instance.delete(`${process.env.KONG_ADMIN_URL}/services/${apiName}`, kongConfig);
+    }
+    catch(error)
+    {
         throw error;
     }
 }
