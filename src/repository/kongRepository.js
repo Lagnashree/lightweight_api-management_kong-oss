@@ -1,10 +1,9 @@
 const yaml= require('yaml');
 const fs= require('fs');
 const { v4: uuid } = require("uuid");
-const TEMP_FILE_DIR=("C:\\dev\\nodejs\\tempdir");
-const TEST_DIR= ("C:\\dev\\nodejs\\testdir");
-let text = "my name is Lagnashree";
-
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
+const TEMP_FILE_DIR=process.env.TEMP_DIR || "./../../tempdir";
 
 function generateDeckDeclarativeFile(apiName, jsonSpecfile, backendHost) {
     let dnsParts = backendHost.split('://');
@@ -22,19 +21,27 @@ function generateDeckDeclarativeFile(apiName, jsonSpecfile, backendHost) {
                 read_timeout: 60000,
                 retries: 5,
                 read_timeout: 60000,
-                routes: createRoutesFromSpec(jsonSpecfile),
+                routes: createRoutesFromSpec(jsonSpecfile,apiName),
+                plugins: {
+                  name: "key-auth",
+                  config: {
+                    key_names: ["X-Client-Id"],
+                    run_on_preflight: false,
+                  },
+                  enabled: true,
+                }
               },
             ],
           };
         };
-    
 
     function createRoutesFromSpec(jsonSpecFile, apiName){
-        let routesFromSpec = Object.keys(jsonSpecFile.paths).map((pathName) => {
+        let routesFromSpec = Object.keys(jsonSpecFile.paths).map((pathName,index) => {
             //console.log('pathname.......', pathName);
             const route = jsonSpecFile.paths[pathName];
             const operations = Object.keys(route);
             return {
+                "name": `${apiName}-route${index}`,
                 "paths": pathName,
                 "operation": operations,
                 "preserve_host": false,
@@ -47,6 +54,7 @@ function generateDeckDeclarativeFile(apiName, jsonSpecfile, backendHost) {
         return routesFromSpec;
     }
     const deployToKong = async (deckJSONConfig, apiName) => {
+        let cloudSecret = await fetchSecret.getCloudSecret();
         const deckYMLConfig = yaml.stringify(deckJSONConfig);
 
         if (!fs.existsSync(TEST_DIR)) {
@@ -60,7 +68,6 @@ function generateDeckDeclarativeFile(apiName, jsonSpecfile, backendHost) {
         if (!fs.existsSync(TEMP_FILE_DIR)) {
           fs.mkdirSync(TEMP_FILE_DIR);
         }
-      
         const fileName = `${TEMP_FILE_DIR}/${apiName}_${uuid()}.yaml`;
       
         fs.writeFileSync(fileName, deckYMLConfig);
@@ -69,7 +76,7 @@ function generateDeckDeclarativeFile(apiName, jsonSpecfile, backendHost) {
       
        /* try {
           childProcess.execSync(
-            `deck sync --headers Kong-Admin-Token:${token} -s ${fileName} --kong-addr ${url}`
+            `deck sync --headers Kong-Admin-Token:${cloudSecret.KONG_TOKEN} -s ${fileName} --kong-addr ${cloudSecret.KONG_URL}`
           );
         } catch (error) {
           throw getDeckCustomError(error);
