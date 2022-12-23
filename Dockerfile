@@ -4,13 +4,9 @@
 
 FROM node:14-slim
 
-
-
 # Create and change to the app directory.
 
 WORKDIR /usr/src/app
-
-
 
 # Copy application dependency manifests to the container image.
 
@@ -18,16 +14,11 @@ WORKDIR /usr/src/app
 
 # Copying this first prevents re-running npm install on every code change.
 
-COPY src/package*.json ./
-
-
+COPY package*.json ./
 
 # Copy local code to the container image.
 
-COPY src ./
-
-
-
+COPY . ./
 # Install production dependencies.
 
 # If you add a package-lock.json, speed your build by switching to 'npm ci'.
@@ -35,9 +26,6 @@ COPY src ./
 # RUN npm ci --only=production
 
 RUN npm install --only=production
-
-
-
 
 # Run the web service on container startup.
 
