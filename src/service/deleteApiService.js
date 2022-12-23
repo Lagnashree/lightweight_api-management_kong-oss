@@ -4,9 +4,10 @@ const logger = require('../config/winston').logger;
 const gcsAdapter = require("../repository/gcsRepository");
 const pubsubRepository = require("../repository/pubsubRepository");
 const dbRepository = require("../repository/dbRepository");
-let kongAdminToken = process.env.KONG_ADMIN_TOKEN;
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
+let kongAdminToken =cloudSecret.KONG_ADMIN_TOKEN;
 const { BaseError, notFound, internalServerError, serviceUnavailable, badRequest } = require('../utils/error')
-const fetchSecret = require("../utils/fetchSecret");
 
 
 const kongConfig = {
@@ -76,7 +77,7 @@ exports.deleteApiInfo = async function (apiName, apiVersion, environment, unique
 async function getKongRouter(apiName)
 {
     try {
-        let kongRouteForApi = await instance.get(`${process.env.KONG_ADMIN_URL}/services/${apiName}/routes`, kongConfig);
+        let kongRouteForApi = await instance.get(`${cloudSecret.KONG_ADMIN_URL}/services/${apiName}/routes`, kongConfig);
         console.log(kongRouteForApi.data.data);
         return kongRouteForApi.data.data;
     }
@@ -88,7 +89,7 @@ async function getKongRouter(apiName)
 async function deleteKongRouter(routeId)
 {
     try {
-        return await instance.delete(`${process.env.KONG_ADMIN_URL}/routes/${routeId}`, kongConfig);
+        return await instance.delete(`${cloudSecret.KONG_ADMIN_URL}/routes/${routeId}`, kongConfig);
     }
     catch(error)
     {
@@ -98,7 +99,7 @@ async function deleteKongRouter(routeId)
 async function deleteKongService(apiName)
 {
     try {
-        return instance.delete(`${process.env.KONG_ADMIN_URL}/services/${apiName}`, kongConfig);
+        return instance.delete(`${cloudSecret.KONG_ADMIN_URL}/services/${apiName}`, kongConfig);
     }
     catch(error)
     {
