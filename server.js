@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const OpenApiValidator = require('express-openapi-validator');
 const bodyParser = require("body-parser");
-dotenv.config({ path: path.join(__dirname, '../') + '.env' });
+dotenv.config({ path: path.join(__dirname, './') + '.env' });
 const logger = require('./src/config/winston').logger;
 const morgan = require('morgan');
 
