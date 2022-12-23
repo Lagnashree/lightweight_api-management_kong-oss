@@ -1,14 +1,16 @@
 const path = require("path");
+const dotenv = require("dotenv");
 const { Storage } = require("@google-cloud/storage");
-
-let serviceKey = "";
+const { getSecret } = require("../../conf/secretManager.js");
+const cloudSecret = getSecret();
 const projectId = process.env.PROJECT_ID;
-let bucketName = process.env.BUCKET_NAME;
-serviceKey = path.join(__dirname, "..", "/service-account.json");
-const storage = new Storage({ projectId: projectId, keyFilename: serviceKey });
+let bucketName = cloudSecret.BUCKET_NAME;
+const envFilePath = path.join(__dirname, "../../", ".env");
+dotenv.config({ path: envFilePath });
+const storage = new Storage({ projectId: projectId });
 
 async function postFile(apiName, apiVersion, environment, fileContent) {
-    let fileName = apiName + "_" + apiVersion + "_" + environment + ".yml";
+    let fileName = apiName.replace(/\s+/g, '-').toLowerCase() + "_" + apiVersion + "_" + environment + ".yml";
     await storage
         .bucket(bucketName)
         .file(fileName)
@@ -17,7 +19,7 @@ async function postFile(apiName, apiVersion, environment, fileContent) {
 }
 
 async function deleteFile(apiName, apiVersion, environment) {
-    let fileName = apiName + "_" + apiVersion + "_" + environment + ".yml";
+    let fileName = apiName.replace(/\s+/g, '-').toLowerCase() + "_" + apiVersion + "_" + environment + ".yml";
     await storage
         .bucket(bucketName)
         .file(fileName.toLowerCase())
