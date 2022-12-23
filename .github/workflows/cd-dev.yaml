@@ -1,0 +1,54 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches:
+      - develop
+env:
+  PROJECT_ID: "${{ secrets.PROJECT_ID }}"
+  RUN_REGION: europe-west4
+  SERVICE_NAME: lightweight_api-management_kong-oss
+
+jobs:
+  setup-build-deploy:
+    name: Setup, Build, and Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: develop
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Setup gcloud CLI
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v0.4.1"
+        with:
+          workload_identity_provider: "${{ secrets.GCP_IDENTITY_PROVIDER }}
+          service_account: "${{ secrets.SA_BUILD_DEPLOY }}"
+      - id: "gcloud"
+        name: "gcloud"
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+
+      - uses: actions/checkout@master
+      - name: Build
+        run: |-
+          gcloud builds submit \
+            --quiet \
+            --tag "eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+            --gcs-log-dir "gs://apim_cloud_build/log" \
+            --gcs-source-staging-dir "gs://apim_cloud_build/staging"
+      - name: Deploy
+        run: |-
+          gcloud run deploy "$SERVICE_NAME" \
+            --quiet \
+            --region "$RUN_REGION" \
+            --image "eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+            --platform "managed" \
+            --min-instances=0 \
+            --service-account="${{ secrets.SA_RUNTIME_EMAIL }}" \
+            --set-env-vars=PROJECT_ID="$PROJECT_ID" \
+            --set-env-vars=TEMP_DIR="/app/tempDir"
