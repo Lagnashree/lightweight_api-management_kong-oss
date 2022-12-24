@@ -26,12 +26,6 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
             })
         });
         
-        let gatewayCreateServiceReqBody = {
-            name: reqBody.apiName,
-            protocol: 'https',
-            host: reqBody.backendHost,
-            port: 443
-        }
         let specFileFromGit = '';
         let jsonSpecFile;
         let checkApispec;
@@ -64,7 +58,6 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
         try {
             await dbRepository.postIntoDb(jsonSpecFile.info.version, reqBody.environment, jsonSpecFile.info.title, reqBody.catalogName, reqBody.apiSecurity, reqBody.apiOrg, reqBody.apiState, reqBody.enabled, reqBody.specUrl)
         }catch (error) {
-            console.log('error in DB operation');
             logger.log('error',`reqId: ${uniqueRqId}. Error whilesaving metadata to DB,  ${error}`);
             throw new BaseError(internalServerError, `Error whilesaving metadata to DB ${jsonSpecFile.info.title}`)
         }
@@ -72,7 +65,7 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
                 let deckFile= kongRepository.generateDeckDeclarativeFile(jsonSpecFile.info.title, jsonSpecFile, reqBody.backendHost);
                 console.log('deckFile',deckFile)
                 logger.log('info',`reqId: ${uniqueRqId}. The generated deck declarative file,  ${JSON.stringify(deckFile)}`);
-                //await  kongRepository.deployToKong(deckFile,reqBody.apiName );
+                await  kongRepository.deployToKong(deckFile, jsonSpecFile.info.title );
         }catch (error) {
                 logger.log('error',`reqId: ${uniqueRqId}.  Error while deploying to kong gateway,  ${error}`);
                 throw new BaseError(internalServerError, "Error while deploying to kong gateway ")
