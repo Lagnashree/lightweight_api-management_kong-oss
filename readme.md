@@ -99,6 +99,7 @@ Create a secret manager called "runtime-secret" with below JSON secret value, re
 Create below GIT secret for GIT Hub Action:
 
 * SA_RUNTIME_EMAIL
+* SA_BUILD_DEPLOY
 * VPC_CONNECTOR
 * PROJECT_ID
 
