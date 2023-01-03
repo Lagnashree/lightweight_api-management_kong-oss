@@ -113,7 +113,7 @@ Logged into VM and ran below steps. It would install required dependency and dow
 ```
 sudo apt update && sudo apt upgrade &&
 sudo apt install curl &&
-sudo apt install lsb-release &&
+sudo apt install lsb-release && sudo apt install apt-transport-https &&
 curl -Lo kong-enterprise-edition-3.0.1.0.all.deb "https://download.konghq.com/gateway-3.x-debian-$(lsb_release -cs)/pool/all/k/kong-enterprise-edition/kong-enterprise-edition_3.0.1.0_amd64.deb" &&
 sudo dpkg -i kong-enterprise-edition-3.0.1.0.all.deb
 ``` 
