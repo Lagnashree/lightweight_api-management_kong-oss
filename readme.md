@@ -134,5 +134,15 @@ sudo cp /etc/kong/kong.conf.default /etc/kong/kong.conf
 
 open the /etc/kong/kong.conf and add below lines
 
+```
+sudo vi /etc/kong/kong.conf
+pg_user = kong
+pg_password = password you set
+pg_database = kong
+pg_host= pg host 
+admin_listen = 0.0.0.0:8001
+```
 
+sudo kong migrations bootstrap -c /etc/kong/kong.conf
+sudo kong start -c /etc/kong/kong.conf
 
