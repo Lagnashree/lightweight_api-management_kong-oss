@@ -143,6 +143,20 @@ pg_host= pg host
 admin_listen = 0.0.0.0:8001
 ```
 
-sudo kong migrations bootstrap -c /etc/kong/kong.conf
-sudo kong start -c /etc/kong/kong.conf
+Run below command the do the complete configuration 
 
+```
+sudo kong migrations bootstrap -c /etc/kong/kong.conf
+```
+
+start the kong gateway 
+
+```
+kong start -c /etc/kong/kong.conf
+```
+
+Verify the installation
+
+```
+curl -i http://localhost:8001
+```
