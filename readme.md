@@ -123,14 +123,14 @@ curl -Lo kong-enterprise-edition-3.0.1.0.all.deb "https://download.konghq.com/ga
 sudo dpkg -i kong-enterprise-edition-3.0.1.0.all.deb
 ``` 
 
-### Step 4:
+### Step 3:
 set up a postgres DB for kong Gateway and Provision a database and a user 
 
 ```
 CREATE USER kong WITH PASSWORD 'super_secret'; CREATE DATABASE kong OWNER kong;
 ```
-    
-### Step 3
+
+### Step 4
 Setup config
 
 ```
@@ -139,5 +139,30 @@ sudo cp /etc/kong/kong.conf.default /etc/kong/kong.conf
 
 open the /etc/kong/kong.conf and add below lines
 
+```
+sudo vi /etc/kong/kong.conf
+pg_user = kong
+pg_password = password you set
+pg_database = kong
+pg_host= pg host 
+admin_listen = 0.0.0.0:8001
+```
 
+Run below command the do the complete configuration 
+
+```
+sudo kong migrations bootstrap -c /etc/kong/kong.conf
+```
+
+start the kong gateway 
+
+```
+kong start -c /etc/kong/kong.conf
+```
+
+Verify the installation
+
+```
+curl -i http://localhost:8001
+```
 
