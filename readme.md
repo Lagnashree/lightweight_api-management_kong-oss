@@ -171,3 +171,16 @@ Verify the installation
 curl -i http://localhost:8001
 ```
 
+## Local setup of application
+
+to setup local environment follow below step
+
+git clone the repo
+in conf folder create a folder called gcp keys and place a service account key file wil name dev.json (with required runtime access as mentioned above)
+create a .env file in top root directory and place below values
+
+```
+GCP_PROJECT_ID=<gcp project id>
+GOOGLE_APPLICATION_CREDENTIALS=./conf/gcpKeys/dev.json
+```
+
