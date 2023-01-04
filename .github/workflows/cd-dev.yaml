@@ -50,5 +50,5 @@ jobs:
             --platform "managed" \
             --min-instances=0 \
             --service-account="${{ secrets.SA_RUNTIME_EMAIL }}" \
-            --set-env-vars=PROJECT_ID="$PROJECT_ID" \
+            --set-env-vars=GCP_PROJECT_ID="$PROJECT_ID" \
             --set-env-vars=TEMP_DIR="/app/tempDir" 
