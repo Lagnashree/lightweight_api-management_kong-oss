@@ -33,8 +33,10 @@ async function getFromDb() {
 
 async function postIntoDb(apiVersion, environment, apiName, catalogName, apiSecurity, apiOrg, apiState, enabled, specUrl) {
     try {
+        //converts space to '-' and make all lower case.
         let apiId = apiName.replace(/\s+/g, '-').toLowerCase();
         let knexClient = await getKnexClient();
+        //upsert operation (.onConflict(['api_id', 'api_version','environment']).merge())
         await knexClient(tableName).insert({
             api_id: apiId,
             api_version: apiVersion,
@@ -46,7 +48,8 @@ async function postIntoDb(apiVersion, environment, apiName, catalogName, apiSecu
             api_state: apiState,
             create_date: getTime(),
             enabled: true
-        })
+        }).onConflict(['api_id', 'api_version','environment'])
+        .merge()
     }
     catch (error) {
        throw error;
