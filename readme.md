@@ -184,3 +184,4 @@ GCP_PROJECT_ID=<gcp project id>
 GOOGLE_APPLICATION_CREDENTIALS=./conf/gcpKeys/dev.json
 ```
 
+run 'npm run start'
