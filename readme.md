@@ -118,14 +118,14 @@ curl -Lo kong-enterprise-edition-3.0.1.0.all.deb "https://download.konghq.com/ga
 sudo dpkg -i kong-enterprise-edition-3.0.1.0.all.deb
 ``` 
 
-### Step 4:
+### Step 3:
 set up a postgres DB for kong Gateway and Provision a database and a user 
 
 ```
 CREATE USER kong WITH PASSWORD 'super_secret'; CREATE DATABASE kong OWNER kong;
 ```
     
-### Step 3
+### Step 4
 Setup config
 
 ```
