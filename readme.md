@@ -9,9 +9,11 @@ The code base here covers the API Gateway installation and setup and nodejs appl
 
 
 ## Application Component Diagram:
+
 <div align="center">
  <img src="app-component-diagram.png">
 </div>
+
 ## GCP Set up
 ### Application Deployment and runtime
 #### GCP Service Account Creation
