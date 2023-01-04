@@ -30,6 +30,7 @@ exports.postApiInvoker = async function (reqBody, uniqueRqId) {
         let jsonSpecFile;
         let checkApispec;
         try {
+            console.log('gitConfig',gitConfig)
             let downloadFileFromGit = await instance.get(reqBody.specUrl, gitConfig);
             if (downloadFileFromGit.status == 200) {
                 specFileFromGit = downloadFileFromGit.data;
