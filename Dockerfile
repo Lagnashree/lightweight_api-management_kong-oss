@@ -1,32 +1,19 @@
-# Use the official lightweight Node.js 10 image.
-
-# https://hub.docker.com/_/node
-
 FROM node:14-slim
-
-# Create and change to the app directory.
 
 WORKDIR /usr/src/app
 
-# Copy application dependency manifests to the container image.
-
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-
-# Copying this first prevents re-running npm install on every code change.
-
 COPY package*.json ./
 
-# Copy local code to the container image.
-
-COPY . ./
-# Install production dependencies.
-
-# If you add a package-lock.json, speed your build by switching to 'npm ci'.
-
-# RUN npm ci --only=production
+COPY src ./
 
 RUN npm install --only=production
 
-# Run the web service on container startup.
+#deck cli install
 
-CMD ["node", "server.js"]
+RUN apt-get -y update
+RUN apt-get -y install curl
+RUN curl -sL https://github.com/kong/deck/releases/download/v1.12.1/deck_1.12.1_linux_amd64.tar.gz -o deck.tar.gz
+RUN tar -xf deck.tar.gz -C /tmp
+RUN cp /tmp/deck /usr/local/bin/
+
+CMD [ "npm", "run", "start" ]
