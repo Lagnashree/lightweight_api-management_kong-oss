@@ -27,7 +27,7 @@ function generateDeckDeclarativeFile(apiTitle, jsonSpecfile, backendHost) {
                 plugins: [{
                   name: "key-auth",
                   config: {
-                    key_names: ["X-Client-Id"],
+                    key_names: ["X-Api-Key"],
                     run_on_preflight: false,
                   },
                   enabled: true,
@@ -69,7 +69,7 @@ function generateDeckDeclarativeFile(apiTitle, jsonSpecfile, backendHost) {
         fs.writeFileSync(fileName, deckYMLConfig);
         try {
           childProcess.execSync(
-            `deck sync --headers Kong-Admin-Token:${cloudSecret.KONG_ADMIN_TOKEN} -s ${fileName} --kong-addr ${cloudSecret.KONG_ADMIN_URL}`
+            `deck sync --headers Kong-Admin-Token:${getSecret.KONG_ADMIN_TOKEN} -s ${fileName} --kong-addr ${cloudSecret.KONG_ADMIN_URL}`
           );
         } catch (error) {
           throw error;
