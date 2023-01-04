@@ -87,16 +87,16 @@ gcloud iam service-accounts add-iam-policy-binding "SERVICE-ACCOUNT-PRINCIPAL" \
 Create a secret manager called "runtime-secret" with below JSON secret value, replace the values in JSON payload with right data.
 ```
 {
-"POSTGRES_HOST":"35.228.53.78",
+"POSTGRES_HOST":"",
 "POSTGRES_PORT":"5432",
-"POSTGRES_USERNAME":"postgres",
-"POSTGRES_PASSWORD":"9474367757",
-"POSTGRES_DATABASE":"postgres",
-"BUCKET_NAME":"devproject_specloader",
-"KONG_ADMIN_TOKEN":"test",
-"KONG_ADMIN_URL":"http://34.88.228.97:8001",
-"PUBSUB_TOPIC":"devproject_topic",
-"GIT_TOKEN":"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"
+"POSTGRES_USERNAME":"",
+"POSTGRES_PASSWORD":"",
+"POSTGRES_DATABASE":"",
+"BUCKET_NAME":"",
+"KONG_ADMIN_TOKEN":"",
+"KONG_ADMIN_URL":"",
+"PUBSUB_TOPIC":"",
+"GIT_TOKEN":""
 }
 ```
 
