@@ -81,15 +81,16 @@ gcloud iam service-accounts add-iam-policy-binding "SERVICE-ACCOUNT-PRINCIPAL" \
 Create a secret manager called "runtime-secret" with below JSON secret value, replace the values in JSON payload with right data.
 ```
 {
-"POSTGRES_HOST":"<POSTGRES_HOST>",
-"POSTGRES_PORT":"<POSTGRES_PORT>",
-"POSTGRES_USERNAME":"<POSTGRES_USERNAME>",
-"POSTGRES_PASSWORD":"<POSTGRES_PASSWORD>",
-"POSTGRES_DATABASE":"<POSTGRES_DATABASE>",
-"BUCKET_NAME":"<BUCKET_NAME>",
-"KONG_ADMIN_TOKEN":"<KONG_ADMIN_TOKEN>",
-"KONG_ADMIN_URL":"<KONG_ADMIN_URL>",
-"GIT_ACCESS_TOKEN": "<GIT_ACCESS_TOKEN>"
+"POSTGRES_HOST":"35.228.53.78",
+"POSTGRES_PORT":"5432",
+"POSTGRES_USERNAME":"postgres",
+"POSTGRES_PASSWORD":"9474367757",
+"POSTGRES_DATABASE":"postgres",
+"BUCKET_NAME":"devproject_specloader",
+"KONG_ADMIN_TOKEN":"test",
+"KONG_ADMIN_URL":"http://34.88.228.97:8001",
+"PUBSUB_TOPIC":"devproject_topic",
+"GIT_TOKEN":"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"
 }
 ```
 
@@ -106,7 +107,9 @@ Create below GIT secret for GIT Hub Action:
 
 ## Kong OSS Installation
 
-Here I have chosen GCP VM to install the kong OSS version 3.0.x (Note this installation is not ready for production use but to set up a quick kong GW to demo)
+📚 Read more : [ kong installation in debian linux ](https://docs.konghq.com/gateway/latest/install/linux/debian/?_ga=2.260295373.1725644792.1672744681-1186856553.1671803909)
+
+Here I have chosen GCP VM with Debian Linux to install the kong OSS version 3.0.x (Note this installation is not ready for production use but to set up a quick kong GW to demo. This installation is not suitable for production use)
 
 ### Step 1
 In GCP console create a VM with below details
