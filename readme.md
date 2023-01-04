@@ -34,6 +34,10 @@ The code base here covers the API Gateway installation and setup and nodejs appl
 
 #### Create a postgresSQL instance in cloud SQL
 
+* add a postgres cloud sql instance with default or preffered configuration and enable public ip
+* once the instance creation is completed allow all ip address (0.0.0.0/0) as allowed network (for quick testing setup, not recommended prod set up).
+connect the sql instance from and postgresql client (e.g pgadmin 4) and run the db.sql script under db repository 
+
 #### Create GCP Workload identity federation
  
 📚 Read more : [GCP Workload Identity Federation for Github ](https://medium.com/google-cloud/how-does-the-gcp-workload-identity-federation-work-with-github-provider-a9397efd7158)
