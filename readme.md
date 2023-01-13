@@ -180,7 +180,7 @@ curl -i http://localhost:8001
 to setup local environment follow below step
 
 * git clone the repo.
-* In conf folder create a folder called gcpKeys  and place a service account key file wil name dev.json (with required runtime access as mentioned above)
+* In conf folder create a folder called gcpKeys  and place a service account key file with name dev.json (with required runtime access as mentioned above)
 * create a .env file in top root directory and place below values
 
 ```
