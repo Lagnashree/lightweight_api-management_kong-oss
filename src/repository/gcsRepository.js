@@ -34,7 +34,7 @@ async function downloadFile(apiName, apiVersion, environment, fileContent) {
         .bucket(bucketName)
         .file(fileName)
         .download(fileContent)
-    return downloadedSpecFile;
+    return downloadedSpecFile.toString();
 }
 
 module.exports = {
