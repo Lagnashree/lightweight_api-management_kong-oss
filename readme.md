@@ -177,8 +177,9 @@ curl -i http://localhost:8001
 
 ## Local setup of application
 
-to setup local environment follow below step
+to setup local environment follow below step:
 
+* intall kong deck tool in local machine https://docs.konghq.com/deck/1.12.x/installation/
 * git clone the repo.
 * In conf folder create a folder called gcpKeys  and place a service account key file with name dev.json (with required runtime access as mentioned above)
 * create a .env file in top root directory and place below values
