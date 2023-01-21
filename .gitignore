@@ -71,7 +71,7 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
-.secrets
+conf/.secrets/runtime-secret
 gcpKeys
 
 # parcel-bundler cache (https://parceljs.org/)
