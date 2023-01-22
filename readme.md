@@ -175,7 +175,7 @@ Verify the installation
 curl -i http://localhost:8001
 ```
 
-## Local setup of application
+## To run the application locally 
 
 to setup local environment follow below step:
 
