@@ -1,190 +1,245 @@
-openapi: 3.0.0
-servers:
-  - description: local server
-    url: http://localhost:8080/api/v1/catalog-service
-info:
-  description: This is a API Catalog Service
-  version: "1.0.0"
-  title: API Catalog Service
-  contact:
-    email: lagnashreedey@gmail.com
-tags:
-  - name: ApiCatalog
-    description: All the information about APIs
-paths:
-  /api:
-    post:
-      tags:
-        - Post API
-      summary: Post information about API(without Api_id) with git url
-      operationId: postAPI
-      description:
-        By passing all the information about the Api in the request body you can enter a new Api record
-      responses:
-        '201':
-          description: Record successfully created
-        '400':
-          description: bad input parameter
-        '404':
-          description: not found
-        '500':
-          description: internal server error
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/postApiInput'
-    get:
-      tags:
-        - Get APIs list
-      summary: Add new non_taxable vehicle
-      operationId: postvehicle
-      description:
-        you can get the list of information of all APIs
-      responses:
-        '200':
-          description: ok
+  openapi: 3.0.0
+  servers:
+    - description: local server
+      url: http://localhost:8080/api/v1
+  info:
+    description: This is a API Catalog Service to maintain API metadata
+    version: "1.0.0"
+    title: API Catalog Service
+    contact:
+      email: lagnashreedey@gmail.com
+  tags:
+    - name: API
+      description: All the information about APIs
+  security:
+    - bearerAuth: []    
+  paths:
+    /catalog_service/api:
+      post:
+        tags:
+          - API
+        summary: Post information about API(without Api_id) with git url
+        operationId: postAPI
+        description:
+          By passing all the information about the Api in the request body you can enter a new Api record.
+        responses:
+          '201':
+            description: Record successfully created
+          '400':
+            description: bad input parameter
+          '409':
+            description: record already exists
+          '500':
+            description: internal server error
+        requestBody:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getAPIoutput'
-        '400':
-          description: bad input parameter
-        '409':
-          description: Record already exists
-  /api/{id}:
-    patch:
-      tags:
-        - patch API record
-      summary: changes only API state
-      operationId: patchAPI
-      description:
-        By providing Api-name, environment and Api-version you can change the Api-state of that particular Api.
-      parameters:
-        - in: path
-          name: Api-name, Api-version, environment
-          description: pass mandatory Api-name, Api-version, environment
-          required: true
-          schema:
+                $ref: '#/components/schemas/postApiInput'
+      get:
+        tags:
+          - API
+        summary: Get the list of all APIs
+        operationId: getAPI
+        description:
+          you can get the list of all the APIs with metadata in dev portal
+        responses:
+          '200':
+            description: ok
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/getAPIoutput'
+          '404':
+            description: not found
+    '/catalog_service/{apiName}/{apiVersion}/{environment}':
+      patch:
+        tags:
+          - API
+        summary: changes only API state
+        operationId: patchAPI
+        description:
+          By providing Api-name, environment and Api-version in path variable you can change the Api-state of that particular Api.
+        parameters:
+          - in: path
+            name: apiName
+            description: pass mandatory apiName
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: apiVersion
+            description: pass the version of the API
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: environment
+            description: environment
+            required: true
+            schema:
+              type: string  
+              
+        responses:
+          '200':
+            description: successfull
+          '400':
+            description: bad input parameter
+          '404':
+            description: Not found
+      delete:
+        tags:
+          - API
+        summary: deletes an Api record from DB, gateway service and spec file from GCS bucket
+        operationId: deleteAPI
+        description: |
+          By passing apiName, apiVersion and environment you can delete that API from DB, gateway and GCS
+        parameters:
+          - in: path
+            name: apiName
+            description: pass mandatory apiName
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: apiVersion
+            description: pass mandatory apiVersion
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: environment
+            description: environment
+            required: true
+            schema:
+              type: string     
+        responses:
+          '200':
+            description: operation successfull
+          '400':
+            description: bad input parameter
+          '404':
+            description: No record found
+    /getSpec/{apiName}/{apiVersion}/{environment}:
+      get:
+        tags:
+          - API
+        summary: get API specification file from GCS bucket
+        operationId: GETspec
+        description:
+          By passing apiName, apiVersion and environment in the path parameter you can get the spec the spec file of the API.
+        parameters:
+          - in: path
+            name: apiName
+            description: pass mandatory apiName
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: apiVersion
+            description: pass mandatory ApiVersion
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: environment
+            description: environment
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: spec file successfully downloaded
+          '404':
+            description: spec file not found
+          '500':
+            description: internal server error
+  components:
+    schemas:
+      postApiInput:
+        type: object
+        required:
+          - environment
+          - catalogName
+          - apiSecurity
+          - apiOrg
+          - apiState
+          - backendHost
+          - specUrl
+        properties:
+          environment:
             type: string
-      responses:
-        '200':
-          description: successfull
-        '400':
-          description: bad input parameter
-        '404':
-          description: Not found
-    delete:
-      tags:
-        - Delete API record
-      summary: deletes an Api record
-      operationId: deleteAPI
-      description: |
-        By passing id you can delete the record of a non_taxable vehicle
-      parameters:
-        - in: path
-          name: Api-name, Api-version, environment
-          description: pass mandatory Api-name, Api-version, environment
-          required: true
-          schema:
+            example: ddhk
+          catalogName:
             type: string
-      responses:
-        '200':
-          description: operation successfull
-        '400':
-          description: bad input parameter
-        '404':
-          description: No record found
-components:
-  schemas:
-    postApiInput:
-      type: object
-      required:
-        - apiVersion
-        - environment
-        - apiName
-        - catalogName
-        - apiSecurity
-        - apiOrg
-        - apiState
-        - createDate
-        - enabled
-        - url
-        - backendHost
-      properties:
-        apiVersion:
-          type: string
-          example: dmahvx
-        environment:
-          type: string
-          example: ddhk
-        apiName:
-          type: string
-          example: ggkb
-        catalogName:
-          type: string
-          example: zcnn
-        apiSecurity:
-          type: string
-          example: fxskj
-        apiOrg:
-          type: string
-          example: tyfgk
-        apiState:
-          type: string
-          example: nhkln
-        createDate:
-          format: date-time
-          type: string
-          example:  "2021-01-30T08:30:00Z"
-        enabled:
-          type: boolean
-          example: "1"
-        url:
-          type: string
-          example: dhfch/hkl/giygk/hygvj
-        backendHost:
-          type: string
-          example: https://localhost
-            
-    getAPIoutput:
-      type: object
-      required:
-        - apiVersion
-        - environment
-        - apiName
-        - catalogName
-        - apiSecurity
-        - apiOrg
-        - apiState
-        - createDate
-        - enabled
-      properties:
-        apiVersion:
-          type: string
-          example: dmahvx
-        environment:
-          type: string
-          example: ddhk
-        apiName:
-          type: string
-          example: ggkb
-        createDate:
-          type: string
-          example: sgfx
-        catalogName:
-          type: string
-          example: zcnn
-        apiSecurity:
-          type: string
-          example: fxskj
-        apiOrg:
-          type: string
-          example: tyfgk
-        apiState:
-          type: string
-          example: nhkln
-        enabled:
-          type: boolean
-          example: "1"
-
+            example: zcnn
+          apiSecurity:
+            type: string
+            example: fxskj
+          apiOrg:
+            type: string
+            example: tyfgk
+          apiState:
+            type: string
+            example: nhkln
+          backendHost :
+            format: string
+            example: https://carcongenstion-6ezsh5lxdq-ez.a.run.app/api/v1/nontaxable_vehicle
+          specUrl:
+            format: string
+            example: https://github.com/Lagnashree/carCongestionTax/tree/main/src/main/java/com/volvo/carCongestionTax/api
+      getAPIoutput:
+        type: object
+        required:
+          - apiVersion
+          - environment
+          - apiName
+          - catalogName
+          - apiSecurity
+          - apiOrg
+          - apiState
+          - backendHost
+          - createDate
+          - enabled
+          - apiPresentInGw
+        properties:
+          apiVersion:
+            type: string
+            example: dmahvx
+          environment:
+            type: string
+            example: ddhk
+          apiName:
+            type: string
+            example: ggkb
+          catalogName:
+            type: string
+            example: zcnn
+          apiSecurity:
+            type: string
+            example: fxskj
+          apiOrg:
+            type: string
+            example: tyfgk
+          apiState:
+            type: string
+            example: nhkln
+          backendHost:
+            format: string
+            example:  https://carcongenstion-6ezsh5lxdq-ez.a.run.app/api/v1/nontaxable_vehicle
+          createDate:
+            format: date-time
+            type: string
+            example: "2021-01-30T08:30:00Z"
+          enabled:
+            type: boolean
+            example: "1"
+          apiPresentInGw:
+            type: boolean
+            example: "1"
+    securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+        description: Bearer token/access token from IAM system to be passed in the Authorization header of API request. Non-OAuth scopes are not defined at the securityScheme level.
