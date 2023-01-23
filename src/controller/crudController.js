@@ -3,6 +3,7 @@ const router = express.Router();
 const logger = require('../config/winston').logger;
 const postApi = require('../service/createApiService');
 const getApiService = require('../service/getApiService');
+const getSpecService = require('../service/getSpecService');
 const deleteApiService = require('../service/deleteApiService');
 const patchApiService = require('../service/patchApiService');
 const StatusCodes = require('http-status-codes');
@@ -14,17 +15,16 @@ router.post('/', async (req, res) => {
     console.log("post");
     let responsePayload = {};
     let statusCode = 500;
-    let reasonPhrase;
+    let reasonPhrase ='BAD_REQUEST';
     let uniqueRqId = util.generateID();
     try {
         let validationResult= requestValidator.apiPostReqValidator(req.body);
         if(validationResult.errors.length>0){
-            console.log('input validation error');
             logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : validationResult.errors`);
+            statusCode = 400;
             throw new BaseError(badRequest, JSON.stringify(validationResult.errors));
         }
         const postAPIResult = await postApi.postApiInvoker(req.body, uniqueRqId);
-        console.log(postAPIResult);
         if (postAPIResult.status === 201) {
             logger.log("info",`reqId:${uniqueRqId}. Request processed successfully`);
             statusCode = postAPIResult.status;
@@ -33,11 +33,9 @@ router.post('/', async (req, res) => {
     }
     catch (error) {
         logger.log("error",`reqId:${uniqueRqId}. Error while processing request ${error}`);
-        console.log(error);
         responsePayload = {
-            "title": reasonPhrase,
             "detail": error.message,
-            "instance": '/api/v1/catalog-service',
+            "instance": '/api/v1/catalog-service/api',
             "operation": 'POST'
         }
     }
@@ -48,18 +46,23 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     let uniqueRqId = util.generateID();
-    let statusCode = 404;
-    let reasonPhrase;
+    let statusCode = 500;
     let page = req.query.page;
     let limit = req.query.limit;
     let apiInfoResponse;
     try {
         apiInfoResponse = await getApiService.getApiInfo(page, limit);
+        statusCode = 200;
+        logger.log('info',`reqId: ${uniqueRqId}.processing request GET api information `);
     }
     catch (error) {
-        console.log('error', error)
+        logger.log("error",`reqId:${uniqueRqId}. Error while processing request GET api information ${error}`);
+        responsePayload = {
+            "detail": error.message,
+            "instance": '/api/v1/catalog-service/api',
+            "operation": 'GET'
+        }
     }
-    statusCode = 200;
     res.status(statusCode).send(apiInfoResponse);
 
 })
@@ -68,61 +71,81 @@ router.get('/', async (req, res) => {
 
 router.delete('/:apiName/:apiVersion/:environment', async (req, res) => {
     let uniqueRqId = util.generateID();
-    let statusCode = 404;
-    let reasonPhrase = 'BAD_REQUEST';
+    let statusCode = 500;
+    let responsePayload='success';
     try {
-        /*let validationResult= requestValidator.apiDeleteReqValidator(req);
+        let validationResult= requestValidator.apiDeleteReqValidator(req);
         if(validationResult.errors.length>0){
             logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : validationResult.errors`);
             throw new BaseError(badRequest, JSON.stringify(validationResult.errors));
-        }*/
+        }
         let deleteInfo = await deleteApiService.deleteApiInfo(req.params.apiName, req.params.apiVersion, req.params.environment, uniqueRqId);
         if (deleteInfo.status === 200) {
-            console.log('deleteInfo', deleteInfo.detail);
             statusCode = deleteInfo.status;
         }
         statusCode = StatusCodes.OK;
     }
     catch (error) {
-        /*responsePayload = {
-            "type": errorType,
-            "title": reasonPhrase,
-            "status": statusCode,
-            "operation": 'delete'
-        }*/
-        console.log(error);
+        logger.log("error",`reqId:${uniqueRqId}. Error while processing request DELETE api information ${error}`);
+        responsePayload = {
+            "detail": error.message,
+            "instance": `/api/v1/catalog-service/api/${req.params.apiName}/${req.params.apiVersion}/${req.params.environment}`,
+            "operation": 'DELETE'
+        }
     }
-    res.status(statusCode).send('success');
+    res.status(statusCode).send(responsePayload);
 })
 
 
 router.patch('/:apiName/:apiVersion/:environment', async (req, res) => {
+    let uniqueRqId = util.generateID();
     let statusCode = 404;
-    let reasonPhrase = 'BAD_REQUEST';
+    let responsePayload='success';
     try {
-        if (typeof req.params.apiName == 'undefined' || req.params.apiName == '' || typeof req.params.apiVersion == 'undefined' || req.params.apiVersion == '' || typeof req.params.environment == 'undefined' || req.params.environment == '') {
-            statusCode = StatusCodes.BAD_REQUEST;
-            reasonPhrase = 'BAD_REQUEST';
-            throw new BaseError(badRequest, "apiName, apiVersionn and environment are manadatory field");
+        let patchValidationResult= requestValidator.apiPatchReqValidator(req);
+        if(patchValidationResult.errors.length>0){
+            statusCode = 400;
+            logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : patchValidationResult.errors`);
+            throw new BaseError(badRequest, JSON.stringify(patchValidationResult.errors));
         }
-        else if (req.params.environment && !['prod', 'ppe', 'cte-f'].includes(req.params.environment.toLowerCase())) {
-            statusCode = StatusCodes.BAD_REQUEST;
-            reasonPhrase = 'BAD_REQUEST';
-            throw new BaseError(badRequest, "Invalid environment field. Value should be one of cte-f, ppe, prod");
-        }
-        let patchInfo = await patchApiService.patchApiInfo(req.params.apiName, req.params.apiVersion, req.params.environment.toUpperCase(), req.body);
-        if (subscriptionInfo.status === 200) {
-            console.log('patchInfo', patchInfo.detail);
+        let patchInfo = await patchApiService.patchApiInfo(req.params.apiName, req.params.apiVersion, req.params.environment, uniqueRqId);
+        if (patchInfo.status === 200) {
             statusCode = patchInfo.status;
         }
         statusCode = StatusCodes.OK;
     }
     catch (error) {
+        logger.log("error",`reqId:${uniqueRqId}. Error while processing request PATCH api information ${error}`);
         responsePayload = {
-            "type": errorType,
-            "title": reasonPhrase,
-            "status": statusCode,
-            "operation": 'patch'
+            "detail": error.message,
+            "instance": `/api/v1/catalog-service/api/${req.params.apiName}/${req.params.apiVersion}/${req.params.environment}`,
+            "operation": 'PATCH'
+        }
+    }
+    res.status(statusCode).send(responsePayload);
+})
+    
+router.get('/getSpec/:apiName/:apiVersion/:environment', async (req, res) => {
+    let uniqueRqId = util.generateID();
+    let statusCode = 500;
+    let responsePayload;
+    try {
+        let getSpecValidationResult = requestValidator.getSpecReqValidator(req);
+        console.log('getSpecValidationResult',getSpecValidationResult);
+        if(getSpecValidationResult.errors.length>0){
+            statusCode = 400;
+            logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : getSpecValidationResult.errors`);
+            throw new BaseError(badRequest, JSON.stringify(getSpecValidationResult.errors));
+        }
+        responsePayload = await getSpecService.getSpecInfo(req.params.apiName, req.params.apiVersion, req.params.environment, uniqueRqId);
+        statusCode = 200;
+    }
+    catch (error) {
+        console.log('error in controller',error);
+        responsePayload = {
+            "detail": error.message,
+            "instance": `/api/v1/catalog-service/api/${req.params.apiName}/${req.params.apiVersion}/${req.params.environment}`,
+            "operation": 'GET'
         }
     }
     res.status(statusCode).send(responsePayload);

@@ -28,7 +28,17 @@ async function deleteFile(apiName, apiVersion, environment) {
 
 }
 
+async function downloadFile(apiName, apiVersion, environment, fileContent) {
+    let fileName = apiName + "_" + apiVersion + "_" + environment + ".yml";
+    let downloadedSpecFile = await storage
+        .bucket(bucketName)
+        .file(fileName)
+        .download(fileContent)
+    return downloadedSpecFile.toString();
+}
+
 module.exports = {
     postFile,
-    deleteFile
+    deleteFile,
+    downloadFile
 }
