@@ -76,6 +76,7 @@ router.delete('/:apiName/:apiVersion/:environment', async (req, res) => {
     try {
         let validationResult= requestValidator.apiDeleteReqValidator(req);
         if(validationResult.errors.length>0){
+            statusCode = 400;
             logger.log("error",`reqId:${uniqueRqId}. filed with bad request" : validationResult.errors`);
             throw new BaseError(badRequest, JSON.stringify(validationResult.errors));
         }
@@ -83,7 +84,6 @@ router.delete('/:apiName/:apiVersion/:environment', async (req, res) => {
         if (deleteInfo.status === 200) {
             statusCode = deleteInfo.status;
         }
-        statusCode = StatusCodes.OK;
     }
     catch (error) {
         logger.log("error",`reqId:${uniqueRqId}. Error while processing request DELETE api information ${error}`);
@@ -93,7 +93,7 @@ router.delete('/:apiName/:apiVersion/:environment', async (req, res) => {
             "operation": 'DELETE'
         }
     }
-    res.status(statusCode).send(responsePayload);
+    res.status(statusCode).set('Req-ID', uniqueRqId).send(responsePayload);
 })
 
 
@@ -122,7 +122,7 @@ router.patch('/:apiName/:apiVersion/:environment', async (req, res) => {
             "operation": 'PATCH'
         }
     }
-    res.status(statusCode).send(responsePayload);
+    res.status(statusCode).set('Req-ID', uniqueRqId).send(responsePayload);
 })
     
 router.get('/getSpec/:apiName/:apiVersion/:environment', async (req, res) => {
@@ -148,7 +148,7 @@ router.get('/getSpec/:apiName/:apiVersion/:environment', async (req, res) => {
             "operation": 'GET'
         }
     }
-    res.status(statusCode).send(responsePayload);
+    res.status(statusCode).set('Req-ID', uniqueRqId).send(responsePayload);
 })
 
 
