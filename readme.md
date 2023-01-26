@@ -32,7 +32,7 @@ The code base here covers the API Gateway installation and setup and nodejs appl
 
 ####  Create pubsub topic
 
-#### Create a postgresSQL instance in cloud SQL
+#### Create a postgreSQL instance in cloud SQL
 
 * add a postgres cloud sql instance with default or preffered configuration and enable public ip
 * once the instance creation is completed allow all ip address (0.0.0.0/0) as allowed network (for quick testing setup, not recommended prod set up).
