@@ -1,6 +1,6 @@
 # API management soluton with Kong OSS gateway
 
-The purpose of this application is to build a lightweight API management solution with Kong OSS gateway, an REST based application to manage API deployment related operations (CRUD), API subscription related operation (CRUD) and a REACT based developer portal to show API Specification. 
+The purpose of this application is to build a lightweight API management solution with Kong OSS gateway, a REST based application to manage API deployment related operations (CRUD), API subscription related operation (CRUD) and a REACT based developer portal to show API Specification. 
 The code base here covers the API Gateway installation and setup and nodejs application to manage API deployment and subscription.
 
 <div align="center">
